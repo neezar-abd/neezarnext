@@ -3,16 +3,5 @@
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
   "installCommand": "npm install",
-  "outputDirectory": ".next",
-  "env": {
-    "NEXTAUTH_SECRET": "@nextauth-secret",
-    "NEXTAUTH_URL": "@nextauth-url",
-    "GITHUB_ID": "@github-id",
-    "GITHUB_SECRET": "@github-secret",
-    "FIREBASE_PROJECT_ID": "@firebase-project-id",
-    "FIREBASE_PRIVATE_KEY": "@firebase-private-key",
-    "FIREBASE_CLIENT_EMAIL": "@firebase-client-email",
-    "GMAIL_USER": "@gmail-user",
-    "GMAIL_PASS": "@gmail-pass"
-  }
+  "outputDirectory": ".next"
 }
