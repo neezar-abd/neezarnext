@@ -1,0 +1,12 @@
+# cache
+./mypy_cache
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build

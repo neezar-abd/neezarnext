@@ -1,0 +1,113 @@
+import { HiEnvelope } from 'react-icons/hi2';
+import { SiDiscord, SiGithub, SiLinkedin, SiX, SiInstagram, SiWhatsapp } from 'react-icons/si';
+import { Tooltip } from '@components/ui/tooltip';
+import { UnstyledLink } from '@components/link/unstyled-link';
+import type { IconType } from 'react-icons';
+
+export function Footer(): React.JSX.Element {
+  return (
+    <footer className='main-border layout mt-12 grid gap-8 border-0 border-t pb-2'>
+      <nav className='mt-6 flex flex-wrap justify-center gap-x-8 gap-y-4'>
+        {footerLinks.map(({ name, href, tip }) => (
+          <Tooltip
+            tooltipClassName='hidden sm:block group-hover:-translate-y-16 peer-focus-visible:-translate-y-16'
+            tip={tip}
+            key={name}
+          >
+            <UnstyledLink
+              className='animated-underline peer text-sm font-medium dark:text-gray-200'
+              href={href}
+            >
+              {name}
+            </UnstyledLink>
+          </Tooltip>
+        ))}
+      </nav>
+      <section className='grid justify-items-center gap-2 text-gray-600 dark:text-gray-300'>
+        <h2 className='font-medium'>Reach me out</h2>
+        <section className='flex gap-4'>
+          {socialLinks.map(({ tip, name, href, Icon }) => (
+            <Tooltip
+              tip={
+                <>
+                  {tip} {name}
+                </>
+              }
+              key={name}
+            >
+              <UnstyledLink
+                className='smooth-tab peer grid transition-colors hover:text-accent-main'
+                href={href}
+              >
+                <Icon className='smooth-tab h-6 w-6' />
+              </UnstyledLink>
+            </Tooltip>
+          ))}
+        </section>
+      </section>
+      <p className='text-center text-sm text-gray-600 dark:text-gray-300'>
+        &copy; Neezar 2025 •{' '}
+        <UnstyledLink
+          className='smooth-tab transition hover:text-gray-800 dark:hover:text-gray-100'
+          href='https://github.com/neezarsigmah/portfolio'
+        >
+          Got any feedback?
+        </UnstyledLink>
+      </p>
+    </footer>
+  );
+}
+
+type FooterLink = {
+  name: string;
+  href: string;
+  tip: string | React.JSX.Element;
+};
+
+const footerLinks: FooterLink[] = [
+  // {
+  //   name: 'Subscribe',
+  //   href: '/subscribe',
+  //   tip: 'Get notified when I publish a new post'
+  // }
+];
+
+type SocialLink = {
+  tip: string;
+  name: string;
+  href: string;
+  Icon: IconType;
+};
+
+const socialLinks: SocialLink[] = [
+  {
+    tip: 'Contact me at',
+    name: 'nizarabdurr@gmail.com',
+    href: 'mailto:nizarabdurr@gmail.com',
+    Icon: HiEnvelope
+  },
+  {
+    tip: 'Follow me on',
+    name: 'Instagram',
+    href: 'https://instagram.com/nizarxrpl1',
+    Icon: SiInstagram
+  },
+  {
+    tip: 'Chat with me on',
+    name: 'WhatsApp',
+    href: 'https://wa.me/6282155721121',
+    Icon: SiWhatsapp
+  },
+  {
+    tip: 'See my projects on',
+    name: 'GitHub',
+    href: 'https://github.com/neezarsigmah',
+    Icon: SiGithub
+  },
+  {
+    tip: 'Follow me on',
+    name: 'X',
+    href: 'https://x.com/nizarxrpl1',
+    Icon: SiX
+  }
+];
