@@ -17,9 +17,13 @@ export const authOptions: AuthOptions = {
       const id = token.sub as string;
       const username = await getGithubUsername(id);
 
+      console.log('Session callback - Username:', username); // Debug log
+
       const typedSession = session as Session & { user: AssertedUser };
 
-      const admin = username === 'neezarsigmah' || username === 'ccrsxx';
+      const admin = username === 'neezar-abd' || username === 'ccrsxx';
+
+      console.log('Session callback - Is Admin:', admin); // Debug log
 
       return {
         ...typedSession,
