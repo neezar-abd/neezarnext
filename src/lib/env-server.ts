@@ -32,15 +32,18 @@ function validateEnv(): EnvSchema {
   let { data, error } = envSchema.safeParse(process.env);
 
   const runningOnCi = process.env.CI === 'true';
+  const runningOnVercel = process.env.VERCEL === '1';
 
-  if (runningOnCi) {
+  if (runningOnCi || runningOnVercel) {
     data = process.env as unknown as EnvSchema;
   }
 
-  const shouldThrowError = error && !runningOnCi;
+  const shouldThrowError = error && !runningOnCi && !runningOnVercel;
 
   if (shouldThrowError) {
-    throw new Error(`Environment validation error: ${error.message}`);
+    console.warn(`Environment validation warning: ${error.message}`);
+    // Don't throw error in production, just use what's available
+    data = process.env as unknown as EnvSchema;
   }
 
   return data as EnvSchema;

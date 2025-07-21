@@ -70,7 +70,8 @@ export default withMDX({
     // Provide default values for required environment variables
     NEXT_PUBLIC_URL: process.env.NEXT_PUBLIC_URL || 'https://localhost:3000',
     NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL || 'https://localhost:3000',
-    NEXT_PUBLIC_OWNER_BEARER_TOKEN: process.env.NEXT_PUBLIC_OWNER_BEARER_TOKEN || 'UMdqTUGrYRmItmGPvEx7GK1okH6zdr0n'
+    NEXT_PUBLIC_OWNER_BEARER_TOKEN: process.env.NEXT_PUBLIC_OWNER_BEARER_TOKEN || 'UMdqTUGrYRmItmGPvEx7GK1okH6zdr0n',
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL || process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://localhost:3000'
   },
   images: {
     remotePatterns: [
