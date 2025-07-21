@@ -66,6 +66,12 @@ export default withMDX({
     // Allow production builds to successfully complete even if your project has type errors
     ignoreBuildErrors: true
   },
+  env: {
+    // Provide default values for required environment variables
+    NEXT_PUBLIC_URL: process.env.NEXT_PUBLIC_URL || 'https://localhost:3000',
+    NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL || 'https://localhost:3000',
+    NEXT_PUBLIC_OWNER_BEARER_TOKEN: process.env.NEXT_PUBLIC_OWNER_BEARER_TOKEN || 'UMdqTUGrYRmItmGPvEx7GK1okH6zdr0n'
+  },
   images: {
     remotePatterns: [
       new URL('https://i.scdn.co/image/**'),
