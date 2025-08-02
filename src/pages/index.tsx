@@ -3,6 +3,7 @@ import { HiDocumentText } from 'react-icons/hi2';
 import { SiGithub, SiLinkedin } from 'react-icons/si';
 import { initializeAllContents } from '@lib/api';
 import { getAllContents } from '@lib/mdx';
+import { getHomeContent } from '@lib/page-content';
 import { setTransition, fadeInWhenVisible } from '@lib/transition';
 import { SEO } from '@components/common/seo';
 import { BlogCard } from '@components/blog/blog-card';
@@ -13,38 +14,55 @@ import { Accent } from '@components/ui/accent';
 import type { GetStaticPropsResult, InferGetStaticPropsType } from 'next';
 import type { IconType } from 'react-icons';
 import type { Blog, Project } from '@lib/types/contents';
+import type { HomeContent } from '@lib/page-content';
 
 export default function Home({
   featuredBlog,
-  featuredProjects
+  featuredProjects,
+  homeContent
 }: InferGetStaticPropsType<typeof getStaticProps>): React.JSX.Element {
+  const socialLink: SocialLink[] = [
+    {
+      name: 'Resume',
+      href: homeContent.resumeLink || 'https://docs.google.com/document/d/1emlC1CdiKDE0sVVqkpoZWj5FSLdXoFUe2kIXAFxF8Kg/edit?usp=sharing',
+      Icon: HiDocumentText
+    },
+    {
+      name: 'LinkedIn',
+      href: homeContent.linkedinLink || 'https://linkedin.com/in/risalamin',
+      Icon: SiLinkedin
+    },
+    {
+      name: 'GitHub',
+      href: homeContent.githubLink || 'https://github.com/ccrsxx',
+      Icon: SiGithub
+    }
+  ];
   return (
     <main className='grid gap-20'>
       <SEO
-        title='Risal Amin'
-        description='An online portfolio and blog by Risal Amin. Showcase some of my past projects and some of my thoughts on the world of web development.'
+        title={homeContent.name}
+        description={homeContent.description}
       />
       <section className='-mt-20 grid min-h-screen content-center'>
         <motion.h2
           className='text-2xl font-bold transition-colors delay-100 md:text-4xl 2xl:text-5xl'
           {...setTransition()}
         >
-          Hi!
+          {homeContent.title}
         </motion.h2>
         <motion.h1
           className='mt-1 text-3xl font-bold transition-colors delay-200 md:text-5xl 2xl:text-6xl'
           {...setTransition({ delayIn: 0.1 })}
         >
-          I&apos;m <Accent>Risal</Accent> - Full Stack Developer
+          I&apos;m <Accent>{homeContent.name}</Accent> - {homeContent.role}
         </motion.h1>
         <motion.p
           className='mt-4 max-w-4xl leading-relaxed text-gray-700 transition-colors delay-[400ms] dark:text-gray-200 
                      md:mt-6 md:text-lg 2xl:text-xl'
           {...setTransition({ delayIn: 0.2 })}
         >
-          I&apos;m a self-taught Software Engineer turned Full Stack Developer.
-          I enjoy working with TypeScript, React, and Node.js. I also love
-          exploring new technologies and learning new things.
+          {homeContent.description}
         </motion.p>
         <motion.section className='mt-6' {...setTransition({ delayIn: 0.3 })}>
           <SpotifyCard />
@@ -124,6 +142,7 @@ export default function Home({
 type HomeProps = {
   featuredBlog: Blog[];
   featuredProjects: Project[];
+  homeContent: HomeContent;
 };
 
 export async function getStaticProps(): Promise<
@@ -133,11 +152,13 @@ export async function getStaticProps(): Promise<
 
   const featuredBlog = await getAllContents('blog');
   const featuredProjects = await getAllContents('projects');
+  const homeContent = getHomeContent();
 
   return {
     props: {
       featuredBlog,
-      featuredProjects
+      featuredProjects,
+      homeContent
     }
   };
 }
@@ -147,21 +168,3 @@ type SocialLink = {
   href: string;
   Icon: IconType;
 };
-
-const socialLink: SocialLink[] = [
-  {
-    name: 'Resume',
-    href: 'https://docs.google.com/document/d/1emlC1CdiKDE0sVVqkpoZWj5FSLdXoFUe2kIXAFxF8Kg/edit?usp=sharing',
-    Icon: HiDocumentText
-  },
-  {
-    name: 'LinkedIn',
-    href: 'https://linkedin.com/in/risalamin',
-    Icon: SiLinkedin
-  },
-  {
-    name: 'GitHub',
-    href: 'https://github.com/ccrsxx',
-    Icon: SiGithub
-  }
-];

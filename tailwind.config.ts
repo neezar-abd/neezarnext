@@ -12,9 +12,9 @@ export default {
       },
       colors: {
         accent: {
-          main: colors.pink[400],
-          start: colors.purple[500],
-          end: colors.pink[400]
+          main: colors.blue[500],
+          start: colors.blue[600],
+          end: colors.cyan[400]
         }
       }
     }

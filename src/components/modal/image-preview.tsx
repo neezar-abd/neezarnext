@@ -5,7 +5,7 @@ import { preventBubbling } from '@lib/helper';
 import { Modal } from './modal';
 
 type ImagePreviewProps = Omit<ImageProps, 'src'> & {
-  src: StaticImageData;
+  src: StaticImageData | string;
   customLink?: string;
   wrapperClassName?: string;
 };
@@ -19,10 +19,19 @@ export function ImagePreview({
 }: ImagePreviewProps): React.JSX.Element {
   const { open, openModal, closeModal } = useModal();
 
-  const { src: imageLink } = src;
+  // Handle both string URLs and StaticImageData
+  const imageLink = typeof src === 'string' ? src : src.src;
+  const isExternalImage = typeof src === 'string' && src.startsWith('http');
+  const isStringSource = typeof src === 'string';
+
+  // Debug logging
+  console.log('ImagePreview Debug:', { src, imageLink, isExternalImage, isStringSource, srcType: typeof src });
 
   const imageIsGif = imageLink.endsWith('.gif');
-  const placeholder: ImageProps['placeholder'] = imageIsGif ? 'empty' : 'blur';
+  // Force 'empty' placeholder for all images to avoid blur errors
+  const placeholder: ImageProps['placeholder'] = 'empty';
+
+  console.log('Placeholder decision:', { imageIsGif, isExternalImage, placeholder });
 
   customLink ??= imageLink;
 
@@ -36,6 +45,10 @@ export function ImagePreview({
               src={src}
               alt={alt}
               placeholder={placeholder}
+              {...(isStringSource && {
+                width: 800,
+                height: 400,
+              })}
             />
             <a
               className='absolute bottom-0 right-0 mx-2 mb-2 translate-y-4 rounded-md bg-white/40 px-2 py-1 
@@ -78,6 +91,10 @@ export function ImagePreview({
           alt={alt}
           title={alt}
           placeholder={placeholder}
+          {...(isStringSource && {
+            width: 800,
+            height: 400,
+          })}
         />
       </button>
     </>

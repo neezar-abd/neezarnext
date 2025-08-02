@@ -12,6 +12,7 @@ import {
   contentsCollection,
   guestbookCollection
 } from './firebase/collections';
+import { db } from './firebase/app';
 import { backendEnv } from './env-server';
 import { getAllContents } from './mdx';
 import { getContentFiles } from './mdx-utils';
@@ -78,6 +79,12 @@ export async function initializeContents(type: ContentType): Promise<void> {
  */
 export async function getGuestbook(): Promise<Guestbook[]> {
   try {
+    // If Firebase is not available, return empty array
+    if (!db) {
+      console.warn('Firebase not available, returning empty guestbook');
+      return [];
+    }
+
     const guestbookSnapshot = await getDocs(
       query(guestbookCollection, orderBy('createdAt', 'desc'))
     );
@@ -102,18 +109,39 @@ export type BlogWithViews = Blog & Pick<ContentMeta, 'views'>;
  * Returns all the blog posts with the views.
  */
 export async function getAllBlogWithViews(): Promise<BlogWithViews[]> {
-  const posts = await getAllContents('blog');
+  try {
+    const posts = await getAllContents('blog');
 
-  const postsPromises = posts.map(async (post) => {
-    const snapshot = await getDoc(doc(contentsCollection, post.slug));
-    const { views } = snapshot.data() as ContentMeta;
+    // If Firebase is not available, return posts with 0 views
+    if (!db) {
+      console.warn('Firebase not available, returning posts with 0 views');
+      return posts.map(post => ({ ...post, views: 0 }));
+    }
 
-    return { ...post, views };
-  });
+    const postsPromises = posts.map(async (post) => {
+      try {
+        const snapshot = await getDoc(doc(contentsCollection, post.slug));
+        const data = snapshot.data();
+        
+        // If document doesn't exist or views is undefined, default to 0
+        const views = data?.views ?? 0;
 
-  const postsWithViews = await Promise.all(postsPromises);
+        return { ...post, views };
+      } catch (error) {
+        console.error(`Error getting views for ${post.slug}:`, error);
+        return { ...post, views: 0 };
+      }
+    });
 
-  return postsWithViews;
+    const postsWithViews = await Promise.all(postsPromises);
+
+    return postsWithViews;
+  } catch (error) {
+    console.error('Failed to get blog posts with views:', error);
+    // Fallback: return posts without views
+    const posts = await getAllContents('blog');
+    return posts.map(post => ({ ...post, views: 0 }));
+  }
 }
 
 /**

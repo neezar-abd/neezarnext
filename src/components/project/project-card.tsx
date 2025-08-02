@@ -22,7 +22,7 @@ export function ProjectCard({
           className='mt-3 h-44 rounded object-cover'
           src={banner}
           alt={title}
-          placeholder='blur'
+          placeholder='empty'
         />
         <p className='animated-underline mt-2 w-fit'>See more →</p>
       </Link>

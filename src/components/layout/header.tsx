@@ -16,10 +16,8 @@ export function Header(): React.JSX.Element {
 
   const baseRoute = '/' + pathname.split('/')[1];
 
-  // Add admin link if user is admin
-  const navLinksWithAdmin = session?.user?.admin 
-    ? [...navLinks, { name: 'Admin', href: '/admin' }]
-    : navLinks;
+  // Always show admin link, but check auth in the admin page itself
+  const navLinksWithAdmin = [...navLinks, { name: 'Admin', href: '/admin' }];
 
   return (
     <>

@@ -40,16 +40,39 @@ export function ContentLayout({
 
   const contentIsBlog = type === 'blog';
 
+  // Extract banner src if it's an object, otherwise use as is
+  const bannerSrc = typeof banner === 'object' && banner && 'src' in banner ? banner.src : banner;
+
   const githubCommitHistoryUrl = `https://github.com/ccrsxx/portofolio/commits/main/src/pages/${type}/${slug}.mdx`;
   const githubContentUrl = `https://github.com/ccrsxx/portofolio/blob/main/src/pages/${type}/${slug}.mdx`;
 
   const article: Article = {
     type,
-    tags,
+    tags: (Array.isArray(tags)
+      ? tags
+      : typeof tags === 'string' && tags
+      ? tags.split(',').map((t) => t.trim())
+      : []
+    ).filter(Boolean) as string[],
     banner,
     publishedAt,
     lastUpdatedAt
   };
+
+  // Defensive: normalize tags for all suggestedContents before passing to BlogCard/ProjectCard
+  function normalizeTags(tags: unknown): string[] {
+    if (Array.isArray(tags)) return tags;
+    if (typeof tags === 'string' && tags.length > 0) {
+      return tags.split(',').map((t) => t.trim()).filter(Boolean);
+    }
+    return [];
+  }
+
+  // Defensive: map over suggestedContents and normalize tags
+  const safeSuggestedContents = (suggestedContents as (Blog | Project)[]).map((item) => ({
+    ...item,
+    tags: normalizeTags(item.tags)
+  }));
 
   return (
     <motion.main className='pt-0' {...setTransition({ distance: 25 })}>
@@ -57,7 +80,7 @@ export function ContentLayout({
       <ImagePreview
         className='max-h-[448px] object-cover'
         wrapperClassName='mt-0.5'
-        src={banner}
+        src={bannerSrc}
         alt={bannerAlt ?? title}
         customLink={bannerLink}
       />
@@ -101,10 +124,10 @@ export function ContentLayout({
         </h2>
         <section className='card-layout'>
           {contentIsBlog
-            ? (suggestedContents as Blog[]).map((suggestedContent, index) => (
+            ? (safeSuggestedContents as Blog[]).map((suggestedContent, index) => (
                 <BlogCard {...suggestedContent} key={index} />
               ))
-            : (suggestedContents as Project[]).map(
+            : (safeSuggestedContents as Project[]).map(
                 (suggestedContent, index) => (
                   <ProjectCard {...suggestedContent} key={index} />
                 )

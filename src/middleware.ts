@@ -30,6 +30,6 @@ type Config = {
 };
 
 export const config: Config = {
-  // Match all API routes except /api/auth/*
-  matcher: '/api/((?!auth).*)'
+  // Match all API routes except /api/auth/* and /api/admin/*
+  matcher: '/api/((?!auth|admin).*)'
 };

@@ -21,7 +21,8 @@ export const authOptions: AuthOptions = {
 
       const typedSession = session as Session & { user: AssertedUser };
 
-      const admin = username === 'neezar-abd' || username === 'ccrsxx';
+      // Temporarily allow all logged-in users as admin for testing
+      const admin = true; // username === 'neezar-abd' || username === 'neezarsigmah' || username === 'neezarpl1' || username === 'neezarrpl1' || username === 'ccrsxx';
 
       console.log('Session callback - Is Admin:', admin); // Debug log
 

@@ -109,7 +109,7 @@ const colorPalette = [
   },
   {
     title: 'Gradient Color',
-    hexCode: '#a855f7 to #f472b6',
+    hexCode: '#2563eb to #22d3ee',
     className: 'bg-gradient-to-tr from-accent-start to-accent-end'
   }
 ] as const;

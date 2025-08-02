@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getSession, signIn } from 'next-auth/react';
+import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import { setTransition } from '@lib/transition';
 import { SEO } from '@components/common/seo';
@@ -8,15 +8,40 @@ import { Button } from '@components/ui/button';
 import { BlogManagement } from '@components/admin/blog-management';
 import { DesignManagement } from '@components/admin/design-management';
 import { StatisticsManagement } from '@components/admin/statistics-management';
-import type { GetServerSidePropsResult, GetServerSidePropsContext, InferGetServerSidePropsType } from 'next';
-import type { CustomSession } from '@lib/types/api';
+import { HomeManagement } from '@components/admin/home-management';
+import { AboutManagement } from '@components/admin/about-management';
 
-export default function AdminDashboard({
-  session
-}: InferGetServerSidePropsType<typeof getServerSideProps>): React.JSX.Element {
-  const [activeTab, setActiveTab] = useState<'blogs' | 'design' | 'stats'>('blogs');
+export default function AdminDashboard(): React.JSX.Element {
+  const [activeTab, setActiveTab] = useState<'blogs' | 'design' | 'stats' | 'home' | 'about'>('blogs');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-  if (!session) {
+  useEffect(() => {
+    // Check simple auth from localStorage
+    const adminAuth = localStorage.getItem('adminAuth');
+    if (adminAuth === 'true') {
+      setIsAuthenticated(true);
+    }
+    setLoading(false);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('adminAuth');
+    router.push('/admin-login');
+  };
+
+  if (loading) {
+    return (
+      <main className='main-container'>
+        <div className='flex min-h-screen items-center justify-center'>
+          <div>Loading...</div>
+        </div>
+      </main>
+    );
+  }
+
+  if (!isAuthenticated) {
     return (
       <main className='main-container'>
         <SEO title='Admin Dashboard - Access Denied' description='Admin access required to view this page' />
@@ -33,31 +58,10 @@ export default function AdminDashboard({
             </p>
             <Button
               className='mt-6'
-              onClick={() => signIn('github')}
+              onClick={() => router.push('/admin-login')}
             >
-              Sign in with GitHub
+              Go to Admin Login
             </Button>
-          </motion.div>
-        </section>
-      </main>
-    );
-  }
-
-  if (!session.user.admin) {
-    return (
-      <main className='main-container'>
-        <SEO title='Admin Dashboard - Unauthorized' description='Admin privileges required to access this dashboard' />
-        <section className='flex min-h-screen flex-col items-center justify-center'>
-          <motion.div
-            className='text-center'
-            {...setTransition({ delayIn: 0.1 })}
-          >
-            <h1 className='text-3xl font-bold'>
-              <Accent>Unauthorized</Accent>
-            </h1>
-            <p className='mt-4 text-gray-600 dark:text-gray-300'>
-              You don't have admin privileges to access this dashboard.
-            </p>
           </motion.div>
         </section>
       </main>
@@ -70,12 +74,22 @@ export default function AdminDashboard({
       
       <section className='py-8'>
         <motion.div {...setTransition({ delayIn: 0.1 })}>
-          <h1 className='text-3xl font-bold'>
-            Welcome back, <Accent>{session.user.username}</Accent>
-          </h1>
-          <p className='mt-2 text-gray-600 dark:text-gray-300'>
-            Manage your content from this dashboard
-          </p>
+          <div className='flex items-center justify-between mb-8'>
+            <div>
+              <h1 className='text-3xl font-bold'>
+                Welcome to <Accent>Admin Dashboard</Accent>
+              </h1>
+              <p className='mt-2 text-gray-600 dark:text-gray-300'>
+                Manage your content from this dashboard
+              </p>
+            </div>
+            <Button
+              className='bg-red-600 hover:bg-red-700'
+              onClick={handleLogout}
+            >
+              Logout
+            </Button>
+          </div>
         </motion.div>
 
         <motion.div
@@ -91,6 +105,26 @@ export default function AdminDashboard({
             onClick={() => setActiveTab('blogs')}
           >
             Blog Management
+          </button>
+          <button
+            className={`pb-2 px-4 font-medium transition-colors ${
+              activeTab === 'home'
+                ? 'border-b-2 border-accent-start text-accent-start'
+                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100'
+            }`}
+            onClick={() => setActiveTab('home')}
+          >
+            Home Page
+          </button>
+          <button
+            className={`pb-2 px-4 font-medium transition-colors ${
+              activeTab === 'about'
+                ? 'border-b-2 border-accent-start text-accent-start'
+                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100'
+            }`}
+            onClick={() => setActiveTab('about')}
+          >
+            About Page
           </button>
           <button
             className={`pb-2 px-4 font-medium transition-colors ${
@@ -119,22 +153,12 @@ export default function AdminDashboard({
           {...setTransition({ delayIn: 0.3 })}
         >
           {activeTab === 'blogs' && <BlogManagement />}
+          {activeTab === 'home' && <HomeManagement />}
+          {activeTab === 'about' && <AboutManagement />}
           {activeTab === 'design' && <DesignManagement />}
           {activeTab === 'stats' && <StatisticsManagement />}
         </motion.div>
       </section>
     </main>
   );
-}
-
-export async function getServerSideProps(
-  context: GetServerSidePropsContext
-): Promise<GetServerSidePropsResult<{ session: CustomSession | null }>> {
-  const session = (await getSession(context)) as CustomSession | null;
-
-  return {
-    props: {
-      session
-    }
-  };
 }

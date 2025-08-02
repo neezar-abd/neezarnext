@@ -1,16 +1,18 @@
-import Banner from '../../../public/assets/blog/custom-layout-in-nextjs/banner.jpg';
 import { ContentLayout } from '@components/layout/content-layout';
 import { getContentSlug } from '@lib/mdx';
 
 export const meta = {
   title: 'Creating Custom Layouts in Next.js',
   publishedAt: '2022-12-26',
-  banner: Banner,
+  banner: {
+    src: '/assets/blog/custom-layout-in-nextjs/banner.jpg',
+    height: 400,
+    width: 800
+  },
   bannerAlt: 'Photo by Milad Fakurian on Unsplash',
-  bannerLink: 'https://unsplash.com/photos/N_nbhTHtmYg',
-  description:
-    'Learn how to create Single Shared Layouts and Per-Page Layouts in Next.js.',
-  tags: 'nextjs'
+  bannerLink: '',
+  description: 'Learn how to create Single Shared Layouts and Per-Page Layouts in Next.js.',
+  tags: ['nextjs', 'react', 'web development']
 };
 
 export const getStaticProps = getContentSlug('blog', 'custom-layout-in-nextjs');
@@ -21,7 +23,7 @@ export default ({ children }) => (
 
 {/* content start */}
 
-React's modular nature allows us to create reusable components, and layouts are no exception. In Next.js, there's a variety of ways to implement custom layouts. In this blog, we'll explore two of the most common approaches:
+'s modular nature allows us to create reusable components, and layouts are no exception. In Next.js, there's a variety of ways to implement custom layouts. In this blog, we'll explore two of the most common approaches:
 
 - [Single Shared Layout](#single-shared-layout)
 - [Per-Page Layout](#per-page-layout)

@@ -34,7 +34,21 @@ export default function Blog({
     const newFilteredPosts = posts.filter(({ title, description, tags }) => {
       const isTitleMatch = textIncludes(title, search);
       const isDescriptionMatch = textIncludes(description, search);
-      const isTagsMatch = splittedSearch.every((tag) => tags.includes(tag));
+      
+      // Handle both string and array formats for tags safely
+      let tagsArray: string[] = [];
+      try {
+        if (Array.isArray(tags)) {
+          tagsArray = tags;
+        } else if (typeof tags === 'string' && tags.length > 0) {
+          tagsArray = tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+        }
+      } catch (error) {
+        console.warn('Error processing tags in blog filter:', error, tags);
+        tagsArray = [];
+      }
+      
+      const isTagsMatch = splittedSearch.every((tag) => tagsArray.includes(tag));
 
       return isTitleMatch || isDescriptionMatch || isTagsMatch;
     });

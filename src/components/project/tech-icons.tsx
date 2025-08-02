@@ -18,12 +18,32 @@ import {
 import { Tooltip } from '../ui/tooltip';
 import type { IconType } from 'react-icons';
 
-export function TechIcons({ tags }: { tags: string }): React.JSX.Element {
-  const techsArray = tags.split(',');
+export function TechIcons({ tags }: { tags: string | string[] }): React.JSX.Element {
+  // Ensure tags is properly handled - be very defensive
+  let techsArray: string[] = [];
+  
+  try {
+    if (Array.isArray(tags)) {
+      techsArray = tags;
+    } else if (typeof tags === 'string' && tags.length > 0) {
+      techsArray = tags.split(',').map(tag => tag.trim());
+    }
+  } catch (error) {
+    console.warn('Error processing tags:', error, tags);
+    return <ul className='mt-2 flex gap-2'></ul>;
+  }
+
+  // Filter for valid techs without using array methods that might fail
+  const validTechs: string[] = [];
+  for (const tech of techsArray) {
+    if (tech && techList[tech]) {
+      validTechs.push(tech);
+    }
+  }
 
   return (
     <ul className='mt-2 flex gap-2 [&>li:first-child>div]:-translate-x-1/3'>
-      {techsArray.map((tech) => {
+      {validTechs.map((tech) => {
         const { name, Icon } = techList[tech];
 
         return (

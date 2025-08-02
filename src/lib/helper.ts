@@ -32,11 +32,22 @@ export function removeContentExtension(content: string): string {
  * Returns an array of unique tags from the contents.
  */
 export function getTags(contents: Blog[]): string[] {
-  const validTags = contents.flatMap(({ tags }) =>
-    tags.split(',').map((tag) => tag.trim())
-  );
+  const validTags = contents.flatMap(({ tags }) => {
+    try {
+      // Handle both string and array formats safely
+      if (Array.isArray(tags)) {
+        return tags.filter(tag => typeof tag === 'string' && tag.trim());
+      } else if (typeof tags === 'string' && tags.length > 0) {
+        return tags.split(',').map((tag) => tag.trim()).filter(tag => tag);
+      }
+      return [];
+    } catch (error) {
+      console.warn('Error processing tags in getTags:', error, tags);
+      return [];
+    }
+  });
 
-  const uniqueTags = Array.from(new Set(validTags));
+  const uniqueTags = Array.from(new Set(validTags.filter(tag => tag)));
 
   return uniqueTags;
 }

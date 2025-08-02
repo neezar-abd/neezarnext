@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev -p 3000",
     "build": "next build",
+    "postbuild": "next-sitemap",
     "build:vercel": "SKIP_ENV_VALIDATION=true next build",
     "start": "next start",
     "type-check": "tsc --noEmit",
@@ -12,6 +13,7 @@
     "format:check": "prettier --check .",
     "lint": "next lint --max-warnings=50 .",
     "lint:fix": "next lint --fix .",
+    "sitemap": "next-sitemap",
     "prepare": "husky"
   },
   "dependencies": {
@@ -22,17 +24,22 @@
     "@prequist/lanyard": "^1.1.0",
     "@tanstack/match-sorter-utils": "^8.7.6",
     "@tanstack/react-table": "^8.7.9",
+    "@types/formidable": "^3.4.5",
     "@vercel/analytics": "^1.0.1",
     "clsx": "^2.0.0",
     "firebase": "^10.0.0",
+    "formidable": "^3.5.4",
     "framer-motion": "^11.0.0",
     "next": "15.3.5",
     "next-auth": "^4.19.2",
+    "next-seo": "^6.8.0",
+    "next-sitemap": "^4.2.3",
     "next-themes": "^0.3.0",
     "nodemailer": "^6.9.1",
     "nprogress": "^0.2.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
+    "react-hot-toast": "^2.5.2",
     "react-icons": "^5.5.0",
     "swr": "^2.0.1",
     "zod": "^4.0.5"

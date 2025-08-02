@@ -1,11 +1,11 @@
 {
-  "name": "Risal Amin | Fullstack Developer",
-  "short_name": "Risal Amin | Fullstack Developer",
-  "description": "An online portfolio and blog by Risal Amin. Showcase some of my past projects and some of my thoughts on the world of web development.",
+  "name": "Neezar | Fullstack Developer",
+  "short_name": "Neezar",
+  "description": "Personal portfolio and blog by Neezar. Showcase of projects and thoughts on web development and technology.",
   "display": "standalone",
   "start_url": "/",
-  "theme_color": "#fff",
-  "background_color": "#000000",
+  "theme_color": "#000000",
+  "background_color": "#ffffff",
   "orientation": "portrait",
   "icons": [
     {

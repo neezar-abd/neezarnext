@@ -68,15 +68,58 @@ export default withMDX({
   },
   env: {
     // Provide default values for required environment variables
-    NEXT_PUBLIC_URL: process.env.NEXT_PUBLIC_URL || 'https://localhost:3000',
-    NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL || 'https://localhost:3000',
+    NEXT_PUBLIC_URL: process.env.NEXT_PUBLIC_URL || 'https://neezar.tech',
+    NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL || 'https://neezar.tech',
     NEXT_PUBLIC_OWNER_BEARER_TOKEN: process.env.NEXT_PUBLIC_OWNER_BEARER_TOKEN || 'UMdqTUGrYRmItmGPvEx7GK1okH6zdr0n',
-    NEXTAUTH_URL: process.env.NEXTAUTH_URL || process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://localhost:3000'
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL || process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://neezar.tech'
   },
   images: {
     remotePatterns: [
-      new URL('https://i.scdn.co/image/**'),
-      new URL('https://avatars.githubusercontent.com/u/**?v=4')
+      {
+        protocol: 'https',
+        hostname: 'i.scdn.co',
+        pathname: '/image/**'
+      },
+      {
+        protocol: 'https',
+        hostname: 'avatars.githubusercontent.com',
+        pathname: '/u/**'
+      },
+      {
+        protocol: 'https',
+        hostname: 'encrypted-tbn0.gstatic.com',
+        pathname: '/images/**'
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        pathname: '/**'
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        pathname: '/**'
+      },
+      {
+        protocol: 'https',
+        hostname: 'unsplash.com',
+        pathname: '/**'
+      },
+      {
+        protocol: 'https',
+        hostname: 'img.freepik.com',
+        pathname: '/**'
+      },
+      {
+        protocol: 'https',
+        hostname: 'via.placeholder.com',
+        pathname: '/**'
+      },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+        pathname: '/**'
+      }
     ]
   },
   pageExtensions: ['ts', 'tsx', 'md', 'mdx']

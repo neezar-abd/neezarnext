@@ -1,0 +1,18 @@
+# Robots.txt for neezar.tech
+User-agent: *
+Allow: /
+
+# Disallow admin pages
+Disallow: /admin*
+Disallow: /api/
+Disallow: /_next/
+Disallow: /404
+
+# Allow important pages
+Allow: /blog
+Allow: /projects
+Allow: /about
+Allow: /guestbook
+
+# Sitemap location
+Sitemap: https://neezar.tech/sitemap.xml

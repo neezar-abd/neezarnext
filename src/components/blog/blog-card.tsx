@@ -35,7 +35,26 @@ export function BlogCard<T extends ValidTag = typeof DEFAULT_TAG>({
 
   bannerAlt ??= title;
 
-  const techTags = tags.split(',');
+  // Handle both string and array formats for tags safely
+  let techTags: string[] = [];
+  
+  try {
+    if (Array.isArray(tags)) {
+      techTags = tags;
+    } else if (typeof tags === 'string' && tags.length > 0) {
+      techTags = tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+    }
+  } catch (error) {
+    console.warn('Error processing tags in BlogCard:', error, tags);
+    techTags = [];
+  }
+
+  // Check if banner is external URL or static import
+  const isExternalImage = typeof banner === 'string' && banner.startsWith('http');
+  const bannerSrc = banner;
+
+  // Force empty placeholder to avoid blur errors with external images
+  const placeholder = 'empty';
 
   return (
     <CustomTag className='grid' {...rest}>
@@ -43,13 +62,17 @@ export function BlogCard<T extends ValidTag = typeof DEFAULT_TAG>({
         <div className='relative'>
           <Image
             className='h-36 rounded-t-md object-cover'
-            src={banner}
+            src={bannerSrc}
             alt={bannerAlt}
             title={bannerAlt}
-            placeholder='blur'
+            placeholder={placeholder}
+            {...(isExternalImage && {
+              width: 800,
+              height: 400,
+            })}
           />
           <ul className='absolute bottom-0 flex w-full justify-end gap-2 p-2'>
-            {techTags.map((tag) => (
+            {techTags && techTags.length > 0 && techTags.map((tag) => (
               <BlogTag
                 className='bg-opacity-80 dark:bg-opacity-60'
                 tag='li'

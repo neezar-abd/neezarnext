@@ -1,0 +1,31 @@
+{
+  "title": "About",
+  "name": "Neezar Abdurrrahman Ahnaf Abiyyi",
+  "content": "Hi, I'm Risal. I started learning web development in November 2021, after building my first web app with Python and the Streamlit module. Since then, I've been dedicated to learning as much as I can about web development.\n\nI began my journey by completing the front-end course on FreeCodeCamp and then moved on to The Odin Project to learn fullstack development. I'm always motivated to learn new technologies and techniques, and I enjoy getting feedback to help me improve.\n\nOn this website, I'll be sharing my projects and writing about what I've learned. I believe that writing helps me better understand and retain new information, and I'm always happy to share my knowledge with others. If you have any questions or want to connect, don't hesitate to reach out!",
+  "techStack": [
+    "Next.js",
+    "TypeScript",
+    "Firebase",
+    "TailwindCSS"
+  ],
+  "certifications": [
+    {
+      "id": "cert-1",
+      "title": "React Developer Certificate",
+      "issuer": "Meta",
+      "date": "2023",
+      "description": "Professional React development certification covering hooks, state management, and modern React patterns.",
+      "imageUrl": "/assets/placeholder-cert.png",
+      "credentialUrl": "https://coursera.org/certificate/example"
+    },
+    {
+      "id": "cert-2", 
+      "title": "AWS Cloud Practitioner",
+      "issuer": "Amazon Web Services",
+      "date": "2022",
+      "description": "Foundational understanding of AWS cloud services and architecture.",
+      "imageUrl": "/assets/placeholder-cert.png",
+      "credentialUrl": "https://aws.amazon.com/certification/example"
+    }
+  ]
+}
