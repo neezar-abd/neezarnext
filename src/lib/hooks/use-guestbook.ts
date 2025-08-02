@@ -1,12 +1,17 @@
 import useSWR from 'swr';
 import { fetcher } from '@lib/fetcher';
 import type { ValidApiEndpoints } from '@lib/types/api';
-import type { Guestbook, Text } from '@lib/types/guestbook';
+import type { Guestbook } from '@lib/types/guestbook';
+
+type GuestbookFormData = {
+  username: string;
+  message: string;
+};
 
 type UseGuestbook = {
   guestbook?: Guestbook[];
   isLoading: boolean;
-  registerGuestbook: (text: Text) => Promise<void>;
+  registerGuestbook: (data: GuestbookFormData) => Promise<void>;
   unRegisterGuestbook: (id: string) => Promise<void>;
 };
 
@@ -24,11 +29,11 @@ export function useGuestbook(fallbackData: Guestbook[]): UseGuestbook {
     { fallbackData }
   );
 
-  const registerGuestbook = async (text: Text): Promise<void> => {
+  const registerGuestbook = async (data: GuestbookFormData): Promise<void> => {
     const newGuestbook = await fetcher<Guestbook>('/api/guestbook', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text })
+      body: JSON.stringify(data)
     });
 
     await mutate([newGuestbook, ...(guestbook ?? [])]);

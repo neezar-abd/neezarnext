@@ -12,8 +12,7 @@ export function GuestbookCard({
       <p className='mt-2'>Share a message for a future visitor of my site.</p>
       {children}
       <p className='mt-2 text-xs text-gray-600 dark:text-gray-300'>
-        Your information is only used to display your name, username, image, and
-        reply by email.
+        Just enter your username and message - no sign-in required!
       </p>
     </div>
   );

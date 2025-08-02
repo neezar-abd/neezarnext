@@ -1,17 +1,19 @@
-import { getServerSession, type AuthOptions } from 'next-auth';
 import {
   addDoc,
   Timestamp,
   serverTimestamp,
   type WithFieldValue
 } from 'firebase/firestore';
-import { getGuestbook, sendEmail } from '@lib/api';
+import { getGuestbook } from '@lib/api';
 import { guestbookCollection } from '@lib/firebase/collections';
-import { authOptions } from '../auth/[...nextauth]';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import type { CustomSession } from '@lib/types/api';
 import type { APIResponse } from '@lib/types/helper';
 import type { Guestbook } from '@lib/types/guestbook';
+
+type GuestbookFormData = {
+  username: string;
+  message: string;
+};
 
 export default async function handler(
   req: NextApiRequest,
@@ -25,31 +27,32 @@ export default async function handler(
     }
 
     if (req.method === 'POST') {
-      const session = await getServerSession<AuthOptions, CustomSession>(
-        req,
-        res,
-        authOptions
-      );
+      const { username, message } = req.body as GuestbookFormData;
 
-      if (!session) return res.status(401).json({ message: 'Unauthorized' });
+      if (!username?.trim() || !message?.trim()) {
+        return res.status(422).json({ message: 'Username and message are required' });
+      }
 
-      const { text } = req.body as Pick<Guestbook, 'text'>;
+      // Simple validation
+      if (username.length > 50) {
+        return res.status(422).json({ message: 'Username too long (max 50 characters)' });
+      }
 
-      if (!text)
-        return res.status(422).json({ message: "Text can't be empty" });
-
-      const { id: createdBy, admin: _, ...rest } = session.user;
+      if (message.length > 500) {
+        return res.status(422).json({ message: 'Message too long (max 500 characters)' });
+      }
 
       const data: WithFieldValue<Omit<Guestbook, 'id'>> = {
-        ...rest,
-        text,
-        createdBy,
+        name: username.trim(),
+        username: username.trim(),
+        text: message.trim(),
+        email: '', // No email for simple guestbook
+        image: '', // Will use generated avatar
+        createdBy: '', // No user tracking
         createdAt: serverTimestamp()
       };
 
       const { id } = await addDoc(guestbookCollection, data);
-
-      await sendEmail(text, session);
 
       const newestGuestbook = {
         ...data,

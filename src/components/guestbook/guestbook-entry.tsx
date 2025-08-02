@@ -1,16 +1,10 @@
-import { useState } from 'react';
 import { motion, type MotionProps } from 'framer-motion';
-import { HiTrash } from 'react-icons/hi2';
 import { formatFullTimeStamp, formatTimestamp } from '@lib/format';
-import { UnstyledLink } from '@components/link/unstyled-link';
-import { Button } from '@components/ui/button';
 import { Tooltip } from '@components/ui/tooltip';
 import { LazyImage } from '@components/ui/lazy-image';
-import type { CustomSession } from '@lib/types/api';
 import type { Guestbook } from '@lib/types/guestbook';
 
 type GuestbookEntryProps = Guestbook & {
-  session: CustomSession | null;
   unRegisterGuestbook: (id: string) => Promise<void>;
 };
 
@@ -18,23 +12,11 @@ export function GuestbookEntry({
   id,
   text,
   name,
-  image,
-  session,
   username,
-  createdAt,
-  createdBy,
-  unRegisterGuestbook
+  createdAt
 }: GuestbookEntryProps): React.JSX.Element {
-  const [loading, setLoading] = useState(false);
-
-  const handleUnRegisterGuestbook = async (): Promise<void> => {
-    setLoading(true);
-    await unRegisterGuestbook(id);
-  };
-
-  const isOwner = session?.user.id === createdBy || session?.user.admin;
-
-  const githubProfileUrl = `https://github.com/${username}`;
+  // Generate a simple avatar based on username
+  const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name || username)}&background=random&size=48`;
 
   return (
     <motion.article
@@ -42,46 +24,32 @@ export function GuestbookEntry({
       layout='position'
       {...variants}
     >
-      <UnstyledLink className='smooth-tab' href={githubProfileUrl}>
-        <LazyImage
-          className='main-border rounded-full transition hover:brightness-75'
-          src={image}
-          alt={name}
-          width={48}
-          height={48}
-        />
-      </UnstyledLink>
+      <LazyImage
+        className='main-border rounded-full'
+        src={avatarUrl}
+        alt={name || username}
+        width={48}
+        height={48}
+      />
       <div className='min-w-0'>
-        <div className='mr-10 flex items-end gap-2'>
-          <UnstyledLink
-            className='custom-underline truncate font-bold'
-            title={name}
-            href={githubProfileUrl}
+        <div className='flex items-end gap-2'>
+          <span
+            className='truncate font-bold text-gray-900 dark:text-gray-100'
+            title={name || username}
           >
-            {name}
-          </UnstyledLink>
+            {name || username}
+          </span>
           <Tooltip
             className='whitespace-nowrap'
             tip={formatFullTimeStamp(createdAt)}
           >
-            <button className='custom-underline peer cursor-pointer text-sm text-gray-600 dark:text-gray-300'>
+            <span className='text-sm text-gray-600 dark:text-gray-300'>
               {formatTimestamp(createdAt)}
-            </button>
+            </span>
           </Tooltip>
         </div>
-        <p className='break-words'>{text}</p>
+        <p className='break-words mt-1'>{text}</p>
       </div>
-      {isOwner && (
-        <Button
-          className='custom-underline main-border clickable !absolute right-2 top-2 
-                     rounded-md p-1.5 text-red-400'
-          loading={loading}
-          type='button'
-          onClick={handleUnRegisterGuestbook}
-        >
-          <HiTrash className='h-5 w-5' />
-        </Button>
-      )}
     </motion.article>
   );
 }

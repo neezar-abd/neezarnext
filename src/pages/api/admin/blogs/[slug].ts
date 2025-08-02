@@ -72,22 +72,27 @@ export default async function handler(
         });
       }
 
-      // Create the updated MDX content
-      const tagsString = Array.isArray(tags) ? JSON.stringify(tags) : `['${tags}']`;
+      // Create the updated MDX content - escape strings to prevent template injection
+      const escapeString = (str: string) => {
+        if (!str) return '';
+        return str.replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/`/g, '\\`');
+      };
+
+      const tagsString = Array.isArray(tags) ? JSON.stringify(tags) : `["${escapeString(tags || '')}"]`;
       const mdxContent = `import { ContentLayout } from '@components/layout/content-layout';
 import { getContentSlug } from '@lib/mdx';
 
 export const meta = {
-  title: '${title}',
-  publishedAt: '${publishedAt}',
+  title: '${escapeString(title)}',
+  publishedAt: '${escapeString(publishedAt)}',
   banner: {
-    src: '${bannerLink || `/assets/blog/${slug}/banner.jpg`}',
+    src: '${escapeString(bannerLink || `/assets/blog/${slug}/banner.jpg`)}',
     height: 400,
     width: 800
   },
-  bannerAlt: '${bannerAlt || ''}',
-  bannerLink: '${bannerLink || ''}',
-  description: '${description}',
+  bannerAlt: '${escapeString(bannerAlt || '')}',
+  bannerLink: '${escapeString(bannerLink || '')}',
+  description: '${escapeString(description)}',
   tags: ${tagsString}
 };
 
@@ -105,23 +110,32 @@ ${content}`;
       await writeFile(blogPath, mdxContent, 'utf8');
 
       return res.status(200).json({ message: 'Blog post updated successfully' });
-
-      // Write the updated MDX file
-      await writeFile(blogPath, mdxContent, 'utf8');
-
-      return res.status(200).json({ message: 'Blog post updated successfully' });
     }
 
     if (req.method === 'DELETE') {
-      // Delete blog post
+      // Note: In production (Vercel), file system is read-only
+      // This feature is only available in development mode
+      if (process.env.NODE_ENV === 'production') {
+        return res.status(501).json({ 
+          message: 'Delete operation not supported in production. Use git to remove blog files.' 
+        });
+      }
+
+      // Delete blog post (development only)
       if (!existsSync(blogPath)) {
         return res.status(404).json({ message: 'Blog post not found' });
       }
 
-      // Delete the MDX file
-      await unlink(blogPath);
-
-      return res.status(200).json({ message: 'Blog post deleted successfully' });
+      try {
+        // Delete the MDX file
+        await unlink(blogPath);
+        return res.status(200).json({ message: 'Blog post deleted successfully' });
+      } catch (error) {
+        console.error('Delete error:', error);
+        return res.status(500).json({ 
+          message: 'Cannot delete file in production environment. Please remove the file manually from git repository.' 
+        });
+      }
     }
 
     return res.status(405).json({ message: 'Method not allowed' });

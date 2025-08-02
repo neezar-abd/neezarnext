@@ -133,22 +133,27 @@ export default async function handler(
         });
       }
 
-      // Create the MDX content
-      const tagsString = Array.isArray(tags) ? JSON.stringify(tags) : `['${tags}']`;
+      // Create the MDX content - escape strings to prevent template injection
+      const escapeString = (str: string) => {
+        if (!str) return '';
+        return str.replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/`/g, '\\`');
+      };
+
+      const tagsString = Array.isArray(tags) ? JSON.stringify(tags) : `["${escapeString(tags || '')}"]`;
       const mdxContent = `import { ContentLayout } from '@components/layout/content-layout';
 import { getContentSlug } from '@lib/mdx';
 
 export const meta = {
-  title: '${title}',
-  publishedAt: '${publishedAt}',
+  title: '${escapeString(title)}',
+  publishedAt: '${escapeString(publishedAt)}',
   banner: {
-    src: '${bannerLink || `/assets/blog/${slug}/banner.jpg`}',
+    src: '${escapeString(bannerLink || `/assets/blog/${slug}/banner.jpg`)}',
     height: 400,
     width: 800
   },
-  bannerAlt: '${bannerAlt || ''}',
-  bannerLink: '${bannerLink || ''}',
-  description: '${description}',
+  bannerAlt: '${escapeString(bannerAlt || '')}',
+  bannerLink: '${escapeString(bannerLink || '')}',
+  description: '${escapeString(description)}',
   tags: ${tagsString}
 };
 

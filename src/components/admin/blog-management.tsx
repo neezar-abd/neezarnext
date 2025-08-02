@@ -6,6 +6,7 @@ import { Button } from '@components/ui/button';
 import { Accent } from '@components/ui/accent';
 import { BlogEditor } from '@components/admin/blog-editor';
 import { ConfirmModal } from '@components/admin/confirm-modal';
+import { useNotification } from '@lib/hooks/use-notification';
 import type { Blog } from '@lib/types/contents';
 
 type BlogPost = Blog & {
@@ -21,6 +22,7 @@ export function BlogManagement(): React.JSX.Element {
   const [selectedBlog, setSelectedBlog] = useState<BlogPost | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [blogToDelete, setBlogToDelete] = useState<BlogPost | null>(null);
+  const { notifySuccess, notifyError } = useNotification();
 
   useEffect(() => {
     fetchBlogs();
@@ -68,9 +70,14 @@ export function BlogManagement(): React.JSX.Element {
         setBlogs(blogs.filter(blog => blog.slug !== blogToDelete.slug));
         setShowDeleteModal(false);
         setBlogToDelete(null);
+        notifySuccess('Blog post deleted successfully!');
+      } else {
+        const errorData = await response.json();
+        notifyError(errorData.message || 'Failed to delete blog post');
       }
     } catch (error) {
       console.error('Failed to delete blog:', error);
+      notifyError('Failed to delete blog post. Please try again.');
     }
   };
 
@@ -95,9 +102,16 @@ export function BlogManagement(): React.JSX.Element {
           className='flex justify-between items-center'
           {...setTransition({ delayIn: 0.1 })}
         >
-          <h2 className='text-2xl font-bold'>
-            <Accent>Blog Posts</Accent>
-          </h2>
+          <div>
+            <h2 className='text-2xl font-bold'>
+              <Accent>Blog Posts</Accent>
+            </h2>
+            {process.env.NODE_ENV === 'production' && (
+              <p className='text-sm text-yellow-600 dark:text-yellow-400 mt-1'>
+                ⚠️ Delete operations are disabled in production environment
+              </p>
+            )}
+          </div>
           <Button
             className='flex items-center gap-2'
             onClick={handleCreateBlog}
@@ -192,9 +206,23 @@ export function BlogManagement(): React.JSX.Element {
                             <FaEdit />
                           </button>
                           <button
-                            className='text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300'
-                            onClick={() => handleDeleteBlog(blog)}
-                            title='Delete Post'
+                            className={`text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 ${
+                              process.env.NODE_ENV === 'production' 
+                                ? 'opacity-50 cursor-not-allowed' 
+                                : ''
+                            }`}
+                            onClick={() => {
+                              if (process.env.NODE_ENV === 'production') {
+                                notifyError('Delete operation is not available in production. Please remove files via git.');
+                                return;
+                              }
+                              handleDeleteBlog(blog);
+                            }}
+                            title={
+                              process.env.NODE_ENV === 'production' 
+                                ? 'Delete not available in production' 
+                                : 'Delete Post'
+                            }
                           >
                             <FaTrash />
                           </button>

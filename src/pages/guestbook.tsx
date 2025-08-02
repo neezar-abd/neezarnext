@@ -1,4 +1,3 @@
-import { getServerSession } from 'next-auth/next';
 import { AnimatePresence, motion } from 'framer-motion';
 import { getGuestbook } from '@lib/api';
 import { setTransition } from '@lib/transition';
@@ -8,18 +7,14 @@ import { Accent } from '@components/ui/accent';
 import { GuestbookCard } from '@components/guestbook/guestbook-card';
 import { GuestbookForm } from '@components/guestbook/guestbook-form';
 import { GuestbookEntry } from '@components/guestbook/guestbook-entry';
-import { authOptions } from './api/auth/[...nextauth]';
 import type {
   GetServerSidePropsResult,
   GetServerSidePropsContext,
   InferGetServerSidePropsType
 } from 'next';
-import type { AuthOptions } from 'next-auth';
-import type { CustomSession } from '@lib/types/api';
 import type { Guestbook } from '@lib/types/guestbook';
 
 export default function Guestbook({
-  session,
   guestbook: fallbackData
 }: InferGetServerSidePropsType<typeof getServerSideProps>): React.JSX.Element {
   const { guestbook, registerGuestbook, unRegisterGuestbook } =
@@ -48,10 +43,7 @@ export default function Guestbook({
       </section>
       <motion.section {...setTransition({ delayIn: 0.2 })}>
         <GuestbookCard>
-          <GuestbookForm
-            session={session}
-            registerGuestbook={registerGuestbook}
-          />
+          <GuestbookForm registerGuestbook={registerGuestbook} />
         </GuestbookCard>
       </motion.section>
       <motion.section
@@ -63,7 +55,6 @@ export default function Guestbook({
             guestbook.map((entry) => (
               <GuestbookEntry
                 {...entry}
-                session={session}
                 unRegisterGuestbook={unRegisterGuestbook}
                 key={entry.id}
               />
@@ -83,24 +74,16 @@ export default function Guestbook({
 }
 
 type GuestbookProps = {
-  session: CustomSession | null;
   guestbook: Guestbook[];
 };
 
 export async function getServerSideProps(
   context: GetServerSidePropsContext
 ): Promise<GetServerSidePropsResult<GuestbookProps>> {
-  const session = await getServerSession<AuthOptions, CustomSession>(
-    context.req,
-    context.res,
-    authOptions
-  );
-
   const guestbook = await getGuestbook();
 
   return {
     props: {
-      session,
       guestbook
     }
   };
