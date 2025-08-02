@@ -73,6 +73,7 @@ export default async function handler(
       }
 
       // Create the updated MDX content
+      const tagsString = Array.isArray(tags) ? JSON.stringify(tags) : `['${tags}']`;
       const mdxContent = `import { ContentLayout } from '@components/layout/content-layout';
 import { getContentSlug } from '@lib/mdx';
 
@@ -87,7 +88,7 @@ export const meta = {
   bannerAlt: '${bannerAlt || ''}',
   bannerLink: '${bannerLink || ''}',
   description: '${description}',
-  tags: '${tags || ''}'
+  tags: ${tagsString}
 };
 
 export const getStaticProps = getContentSlug('blog', '${slug}');
@@ -99,6 +100,11 @@ export default ({ children }) => (
 {/* content start */}
 
 ${content}`;
+
+      // Write the updated MDX file
+      await writeFile(blogPath, mdxContent, 'utf8');
+
+      return res.status(200).json({ message: 'Blog post updated successfully' });
 
       // Write the updated MDX file
       await writeFile(blogPath, mdxContent, 'utf8');

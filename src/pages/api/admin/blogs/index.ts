@@ -43,16 +43,30 @@ async function getBlogPostsFromFiles(): Promise<BlogPost[]> {
           const titleMatch = metaContent.match(/title:\s*['"`](.*?)['"`]/);
           const publishedAtMatch = metaContent.match(/publishedAt:\s*['"`](.*?)['"`]/);
           const descriptionMatch = metaContent.match(/description:\s*['"`]([\s\S]*?)['"`]/);
-          const tagsMatch = metaContent.match(/tags:\s*['"`](.*?)['"`]/);
+          const tagsMatch = metaContent.match(/tags:\s*\[(.*?)\]/);
           const bannerAltMatch = metaContent.match(/bannerAlt:\s*['"`](.*?)['"`]/);
           
           const slug = file.replace('.mdx', '');
+          
+          // Parse tags properly (handle both array and string formats)
+          let tags: string[] = [];
+          if (tagsMatch) {
+            try {
+              // Parse array format: ['tag1', 'tag2']
+              const tagsString = `[${tagsMatch[1]}]`;
+              tags = JSON.parse(tagsString);
+            } catch {
+              // Fallback to string format
+              const tagsString = tagsMatch[1].replace(/['"]/g, '');
+              tags = tagsString.split(',').map(t => t.trim()).filter(Boolean);
+            }
+          }
           
           const blog: BlogPost = {
             title: titleMatch ? titleMatch[1] : 'Untitled',
             description: descriptionMatch ? descriptionMatch[1] : '',
             publishedAt: publishedAtMatch ? publishedAtMatch[1] : '',
-            tags: tagsMatch ? tagsMatch[1] : '',
+            tags: tags, // Use parsed array
             slug,
             readTime: '5 min read', // Default value
             banner: {
@@ -120,6 +134,7 @@ export default async function handler(
       }
 
       // Create the MDX content
+      const tagsString = Array.isArray(tags) ? JSON.stringify(tags) : `['${tags}']`;
       const mdxContent = `import { ContentLayout } from '@components/layout/content-layout';
 import { getContentSlug } from '@lib/mdx';
 
@@ -134,7 +149,7 @@ export const meta = {
   bannerAlt: '${bannerAlt || ''}',
   bannerLink: '${bannerLink || ''}',
   description: '${description}',
-  tags: '${tags || ''}'
+  tags: ${tagsString}
 };
 
 export const getStaticProps = getContentSlug('blog', '${slug}');
@@ -160,7 +175,7 @@ ${content}`;
       const newBlog: BlogPost = {
         title,
         description,
-        tags: tags || '',
+        tags: Array.isArray(tags) ? tags : (tags ? tags.split(',').map(t => t.trim()) : []),
         publishedAt,
         banner: {
           src: `/assets/blog/${slug}/banner.jpg`,

@@ -160,12 +160,17 @@ export function BlogManagement(): React.JSX.Element {
                       </td>
                       <td className='px-6 py-4'>
                         <div className='flex flex-wrap gap-1'>
-                          {blog.tags.split(',').map((tag, index) => (
+                          {(Array.isArray(blog.tags) 
+                            ? blog.tags 
+                            : typeof blog.tags === 'string' 
+                              ? blog.tags.split(',').map(t => t.trim())
+                              : []
+                          ).map((tag, index) => (
                             <span
                               key={index}
                               className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
                             >
-                              {tag.trim()}
+                              {tag}
                             </span>
                           ))}
                         </div>
