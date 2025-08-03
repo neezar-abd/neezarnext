@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { HiDocumentText } from 'react-icons/hi2';
 import { SiGithub, SiLinkedin } from 'react-icons/si';
-import { initializeAllContents } from '@lib/api';
+import { initializeAllContents, getAllBlogWithViews } from '@lib/api';
 import { getAllContents } from '@lib/mdx';
 import { getHomeContent } from '@lib/page-content';
 import { setTransition, fadeInWhenVisible } from '@lib/transition';
@@ -15,6 +15,7 @@ import type { GetStaticPropsResult, InferGetStaticPropsType } from 'next';
 import type { IconType } from 'react-icons';
 import type { Blog, Project } from '@lib/types/contents';
 import type { HomeContent } from '@lib/page-content';
+import type { BlogWithViews } from '@lib/api';
 
 export default function Home({
   featuredBlog,
@@ -140,7 +141,7 @@ export default function Home({
 }
 
 type HomeProps = {
-  featuredBlog: Blog[];
+  featuredBlog: BlogWithViews[];
   featuredProjects: Project[];
   homeContent: HomeContent;
 };
@@ -150,7 +151,7 @@ export async function getStaticProps(): Promise<
 > {
   await initializeAllContents();
 
-  const featuredBlog = await getAllContents('blog');
+  const featuredBlog = await getAllBlogWithViews();
   const featuredProjects = await getAllContents('projects');
   const homeContent = getHomeContent();
 

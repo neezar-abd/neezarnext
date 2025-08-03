@@ -108,7 +108,7 @@ export async function getGuestbook(): Promise<Guestbook[]> {
 /**
  * Convert FirestoreBlog to Blog format for consistency with MDX blogs
  */
-function firestoreBlogToBlog(firestoreBlog: FirestoreBlog): Blog {
+function firestoreBlogToBlog(firestoreBlog: FirestoreBlog): Blog & { isFirestore?: boolean } {
   return {
     tags: firestoreBlog.tags,
     slug: firestoreBlog.slug,
@@ -120,7 +120,8 @@ function firestoreBlogToBlog(firestoreBlog: FirestoreBlog): Blog {
     description: firestoreBlog.description,
     publishedAt: firestoreBlog.publishedAt,
     bannerAlt: firestoreBlog.bannerAlt,
-    bannerLink: firestoreBlog.bannerLink
+    bannerLink: firestoreBlog.bannerLink,
+    isFirestore: true // Add identifier for Firestore blogs
   };
 }
 
