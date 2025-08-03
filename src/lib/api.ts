@@ -6,7 +6,8 @@ import {
   getDoc,
   setDoc,
   getDocs,
-  orderBy
+  orderBy,
+  collection
 } from 'firebase/firestore';
 import {
   contentsCollection,
@@ -27,6 +28,7 @@ import type {
   ContentStatistics
 } from './types/statistics';
 import type { Guestbook } from './types/guestbook';
+import type { FirestoreBlog } from './types/firestore-blog';
 
 /**
  * Initialize all blog and projects if not exists in firestore at build time.
@@ -103,22 +105,77 @@ export async function getGuestbook(): Promise<Guestbook[]> {
   }
 }
 
+/**
+ * Convert FirestoreBlog to Blog format for consistency with MDX blogs
+ */
+function firestoreBlogToBlog(firestoreBlog: FirestoreBlog): Blog {
+  return {
+    tags: firestoreBlog.tags,
+    slug: firestoreBlog.slug,
+    title: firestoreBlog.title,
+    banner: firestoreBlog.bannerLink 
+      ? { src: firestoreBlog.bannerLink, height: 400, width: 800 }
+      : { src: '/assets/placeholder-cert.png', height: 400, width: 800 },
+    readTime: '5 min read', // Default read time for Firestore blogs
+    description: firestoreBlog.description,
+    publishedAt: firestoreBlog.publishedAt,
+    bannerAlt: firestoreBlog.bannerAlt,
+    bannerLink: firestoreBlog.bannerLink
+  };
+}
+
+/**
+ * Get all Firestore blogs
+ */
+async function getFirestoreBlogs(): Promise<Blog[]> {
+  if (!db) {
+    return [];
+  }
+
+  try {
+    const blogsRef = collection(db, 'blogs');
+    const q = query(blogsRef, orderBy('createdAt', 'desc'));
+    const querySnapshot = await getDocs(q);
+    
+    const firestoreBlogs: FirestoreBlog[] = [];
+    querySnapshot.forEach((doc) => {
+      firestoreBlogs.push({
+        id: doc.id,
+        ...doc.data()
+      } as FirestoreBlog);
+    });
+
+    // Convert Firestore blogs to Blog format
+    return firestoreBlogs.map(firestoreBlogToBlog);
+  } catch (error) {
+    console.error('Failed to fetch Firestore blogs:', error);
+    return [];
+  }
+}
+
 export type BlogWithViews = Blog & Pick<ContentMeta, 'views'>;
 
 /**
- * Returns all the blog posts with the views.
+ * Returns all the blog posts with the views, combining MDX and Firestore blogs.
  */
 export async function getAllBlogWithViews(): Promise<BlogWithViews[]> {
   try {
-    const posts = await getAllContents('blog');
+    // Get blogs from both sources
+    const [mdxPosts, firestoreBlogs] = await Promise.all([
+      getAllContents('blog'),
+      getFirestoreBlogs()
+    ]);
+
+    // Combine all blogs
+    const allPosts = [...mdxPosts, ...firestoreBlogs];
 
     // If Firebase is not available, return posts with 0 views
     if (!db) {
       console.warn('Firebase not available, returning posts with 0 views');
-      return posts.map(post => ({ ...post, views: 0 }));
+      return allPosts.map(post => ({ ...post, views: 0 }));
     }
 
-    const postsPromises = posts.map(async (post) => {
+    const postsPromises = allPosts.map(async (post) => {
       try {
         const snapshot = await getDoc(doc(contentsCollection, post.slug));
         const data = snapshot.data();
@@ -135,10 +192,13 @@ export async function getAllBlogWithViews(): Promise<BlogWithViews[]> {
 
     const postsWithViews = await Promise.all(postsPromises);
 
+    // Sort by published date (newest first)
+    postsWithViews.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+
     return postsWithViews;
   } catch (error) {
     console.error('Failed to get blog posts with views:', error);
-    // Fallback: return posts without views
+    // Fallback: return MDX posts without views
     const posts = await getAllContents('blog');
     return posts.map(post => ({ ...post, views: 0 }));
   }
