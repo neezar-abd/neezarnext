@@ -14,6 +14,7 @@ type BlogEditorProps = {
   mode: 'create' | 'edit';
   blog: BlogPost | null;
   onClose: () => void;
+  storageMode?: 'file' | 'firestore';
 };
 
 type BlogFormData = {
@@ -32,7 +33,7 @@ type FileUpload = {
   preview: string | null;
 };
 
-export function BlogEditor({ mode, blog, onClose }: BlogEditorProps): React.JSX.Element {
+export function BlogEditor({ mode, blog, onClose, storageMode = 'firestore' }: BlogEditorProps): React.JSX.Element {
   const { success, error, info, loading, dismiss } = useNotification();
   
   const [formData, setFormData] = useState<BlogFormData>({
@@ -73,13 +74,17 @@ export function BlogEditor({ mode, blog, onClose }: BlogEditorProps): React.JSX.
 
   const fetchBlogContent = async (slug: string) => {
     try {
-      const response = await fetch(`/api/admin/blogs/${slug}/content`);
+      const endpoint = storageMode === 'firestore' 
+        ? `/api/admin/blogs/firestore/${slug}` 
+        : `/api/admin/blogs/${slug}/content`;
+      
+      const response = await fetch(endpoint);
       if (response.ok) {
         const { content } = await response.json();
         setFormData(prev => ({ ...prev, content }));
       }
-    } catch (error) {
-      console.error('Failed to fetch blog content:', error);
+    } catch (err) {
+      console.error('Failed to fetch blog content:', err);
     }
   };
 
@@ -180,9 +185,10 @@ export function BlogEditor({ mode, blog, onClose }: BlogEditorProps): React.JSX.
         }
       }
       
+      const baseEndpoint = storageMode === 'firestore' ? '/api/admin/blogs/firestore' : '/api/admin/blogs';
       const endpoint = mode === 'create' 
-        ? '/api/admin/blogs'
-        : `/api/admin/blogs/${slug}`;
+        ? baseEndpoint
+        : `${baseEndpoint}/${slug}`;
       
       const method = mode === 'create' ? 'POST' : 'PUT';
       

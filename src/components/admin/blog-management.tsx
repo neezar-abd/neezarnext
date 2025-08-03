@@ -14,6 +14,7 @@ type BlogPost = Blog & {
 };
 
 type EditorMode = 'create' | 'edit' | null;
+type StorageMode = 'file' | 'firestore';
 
 export function BlogManagement(): React.JSX.Element {
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
@@ -22,22 +23,25 @@ export function BlogManagement(): React.JSX.Element {
   const [selectedBlog, setSelectedBlog] = useState<BlogPost | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [blogToDelete, setBlogToDelete] = useState<BlogPost | null>(null);
-  const { notifySuccess, notifyError } = useNotification();
+  const [storageMode, setStorageMode] = useState<StorageMode>('firestore'); // Default to Firestore
+  const { success, error } = useNotification();
 
   useEffect(() => {
     fetchBlogs();
-  }, []);
+  }, [storageMode]); // Re-fetch when storage mode changes
 
   const fetchBlogs = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/blogs');
+      const endpoint = storageMode === 'firestore' ? '/api/admin/blogs/firestore' : '/api/admin/blogs';
+      const response = await fetch(endpoint);
       if (response.ok) {
         const data = await response.json();
         setBlogs(data);
       }
-    } catch (error) {
-      console.error('Failed to fetch blogs:', error);
+    } catch (err) {
+      console.error('Failed to fetch blogs:', err);
+      error('Failed to fetch blogs');
     } finally {
       setLoading(false);
     }
@@ -62,7 +66,11 @@ export function BlogManagement(): React.JSX.Element {
     if (!blogToDelete) return;
 
     try {
-      const response = await fetch(`/api/admin/blogs/${blogToDelete.slug}`, {
+      const endpoint = storageMode === 'firestore' 
+        ? `/api/admin/blogs/firestore/${blogToDelete.slug}` 
+        : `/api/admin/blogs/${blogToDelete.slug}`;
+      
+      const response = await fetch(endpoint, {
         method: 'DELETE',
       });
 
@@ -70,14 +78,14 @@ export function BlogManagement(): React.JSX.Element {
         setBlogs(blogs.filter(blog => blog.slug !== blogToDelete.slug));
         setShowDeleteModal(false);
         setBlogToDelete(null);
-        notifySuccess('Blog post deleted successfully!');
+        success('Blog post deleted successfully!');
       } else {
         const errorData = await response.json();
-        notifyError(errorData.message || 'Failed to delete blog post');
+        error(errorData.message || 'Failed to delete blog post');
       }
-    } catch (error) {
-      console.error('Failed to delete blog:', error);
-      notifyError('Failed to delete blog post. Please try again.');
+    } catch (err) {
+      console.error('Failed to delete blog:', err);
+      error('Failed to delete blog post. Please try again.');
     }
   };
 
@@ -106,19 +114,34 @@ export function BlogManagement(): React.JSX.Element {
             <h2 className='text-2xl font-bold'>
               <Accent>Blog Posts</Accent>
             </h2>
-            {process.env.NODE_ENV === 'production' && (
+            {process.env.NODE_ENV === 'production' && storageMode === 'file' && (
               <p className='text-sm text-yellow-600 dark:text-yellow-400 mt-1'>
                 ⚠️ Delete operations are disabled in production environment
               </p>
             )}
           </div>
-          <Button
-            className='flex items-center gap-2'
-            onClick={handleCreateBlog}
-          >
-            <FaPlus className='text-sm' />
-            Create New Post
-          </Button>
+          
+          <div className='flex items-center gap-4'>
+            <div className='flex items-center gap-2'>
+              <span className='text-sm font-medium'>Storage:</span>
+              <select
+                value={storageMode}
+                onChange={(e) => setStorageMode(e.target.value as StorageMode)}
+                className='px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-sm'
+              >
+                <option value="firestore">Firestore (Production)</option>
+                <option value="file">File System (Development)</option>
+              </select>
+            </div>
+            
+            <Button
+              className='flex items-center gap-2'
+              onClick={handleCreateBlog}
+            >
+              <FaPlus className='text-sm' />
+              Create New Post
+            </Button>
+          </div>
         </motion.div>
 
         <motion.div
@@ -213,7 +236,7 @@ export function BlogManagement(): React.JSX.Element {
                             }`}
                             onClick={() => {
                               if (process.env.NODE_ENV === 'production') {
-                                notifyError('Delete operation is not available in production. Please remove files via git.');
+                                error('Delete operation is not available in production. Please remove files via git.');
                                 return;
                               }
                               handleDeleteBlog(blog);
@@ -243,6 +266,7 @@ export function BlogManagement(): React.JSX.Element {
             mode={editorMode}
             blog={selectedBlog}
             onClose={handleEditorClose}
+            storageMode={storageMode}
           />
         )}
       </AnimatePresence>
