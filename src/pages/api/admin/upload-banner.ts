@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { IncomingForm } from 'formidable';
-import path from 'path';
 import fs from 'fs';
+import { uploadToCloudinary } from '@lib/cloudinary';
 
 export const config = {
   api: {
@@ -38,34 +38,27 @@ export default async function handler(
       return res.status(400).json({ message: 'Only image files are allowed' });
     }
 
-    // Create upload directory if it doesn't exist
-    const uploadDir = path.join(process.cwd(), 'public', 'assets', 'blog', slug);
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
-    // Generate filename with extension
-    const fileExtension = path.extname(file.originalFilename || '');
-    const fileName = `banner${fileExtension}`;
-    const uploadPath = path.join(uploadDir, fileName);
-
-    // Move file to upload directory
-    fs.copyFileSync(file.filepath, uploadPath);
+    // Read file buffer
+    const fileBuffer = fs.readFileSync(file.filepath);
+    
+    // Upload to Cloudinary
+    const fileName = `${slug}-banner`;
+    const cloudinaryUrl = await uploadToCloudinary(fileBuffer, fileName, 'banners');
 
     // Clean up temporary file
     fs.unlinkSync(file.filepath);
 
-    // Return the public URL
-    const publicUrl = `/assets/blog/${slug}/${fileName}`;
-
     res.status(200).json({
       message: 'File uploaded successfully',
-      url: publicUrl,
-      filename: fileName
+      url: cloudinaryUrl,
+      filename: `${fileName}.jpg`
     });
 
   } catch (error) {
     console.error('Upload error:', error);
-    res.status(500).json({ message: 'Failed to upload file' });
+    res.status(500).json({ 
+      message: 'Failed to upload file',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 }

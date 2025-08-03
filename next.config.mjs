@@ -124,6 +124,11 @@ export default withMDX({
         protocol: 'https',
         hostname: 'ui-avatars.com',
         pathname: '/api/**'
+      },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**'
       }
     ]
   },

@@ -26,6 +26,7 @@
     "@tanstack/react-table": "^8.7.9",
     "@types/formidable": "^3.4.5",
     "@vercel/analytics": "^1.0.1",
+    "cloudinary": "^2.7.0",
     "clsx": "^2.0.0",
     "firebase": "^10.0.0",
     "formidable": "^3.5.4",
